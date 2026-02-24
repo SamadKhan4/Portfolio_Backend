@@ -16,7 +16,10 @@ const app = express();
 connectDB();
 
 // Init Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins
+  credentials: true
+}));
 app.use(express.json({ extended: false }));
 
 // Rate limiting
