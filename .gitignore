@@ -27,3 +27,5 @@ coverage
 .git-credentials
 .vscode
 .DS_Store
+API_DOCUMENTATION.md
+APIs Documentation

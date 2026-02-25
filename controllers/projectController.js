@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const cloudinary = require('../utils/cloudinary');
 
 // @desc    Get all projects
 // @route   GET /api/projects
@@ -82,7 +83,39 @@ exports.getProjectById = async (req, res, next) => {
 // @access  Private/Admin
 exports.createProject = async (req, res, next) => {
   try {
-    const project = await Project.create(req.body);
+    let imageData = {};
+    
+    // Handle image upload if present
+    if (req.file) {
+      // Upload image to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'portfolio_projects',
+        use_filename: false,
+        unique_filename: true,
+      });
+      
+      imageData.image = result.secure_url;
+      imageData.cloudinaryId = result.public_id;
+    } else {
+      // If no file is uploaded, check if image URL is provided in the request body
+      if (req.body.image) {
+        imageData.image = req.body.image;
+      } else {
+        // If neither file nor URL is provided, throw an error
+        return res.status(400).json({
+          success: false,
+          message: 'Image is required'
+        });
+      }
+    }
+
+    // Combine the image data with other project data
+    const projectData = {
+      ...req.body,
+      ...imageData
+    };
+
+    const project = await Project.create(projectData);
 
     res.status(201).json({
       success: true,
@@ -120,10 +153,43 @@ exports.updateProject = async (req, res, next) => {
       });
     }
 
-    project = await Project.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
+    let updateData = { ...req.body };
+    
+    // Handle image upload if present
+    if (req.file) {
+      // Delete the old image from Cloudinary if it exists
+      if (project.cloudinaryId) {
+        try {
+          await cloudinary.uploader.destroy(project.cloudinaryId);
+        } catch (err) {
+          console.error('Error deleting old image from Cloudinary:', err);
+        }
+      }
+      
+      // Upload new image to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'portfolio_projects',
+        use_filename: false,
+        unique_filename: true,
+      });
+      
+      updateData.image = result.secure_url;
+      updateData.cloudinaryId = result.public_id;
+    } else if (req.body.image !== undefined) {
+      // If no file uploaded but image field is explicitly provided in the request body
+      updateData.image = req.body.image;
+    }
+    // If no file is uploaded and image field is not explicitly provided, keep the existing image
+
+    // Update the project with the new data
+    project = await Project.findByIdAndUpdate(
+      req.params.id, 
+      updateData, 
+      {
+        new: true,
+        runValidators: true
+      }
+    );
 
     res.status(200).json({
       success: true,
@@ -166,6 +232,15 @@ exports.deleteProject = async (req, res, next) => {
         success: false,
         message: 'Project not found'
       });
+    }
+
+    // Delete the image from Cloudinary if it exists
+    if (project.cloudinaryId) {
+      try {
+        await cloudinary.uploader.destroy(project.cloudinaryId);
+      } catch (err) {
+        console.error('Error deleting image from Cloudinary:', err);
+      }
     }
 
     await project.remove();

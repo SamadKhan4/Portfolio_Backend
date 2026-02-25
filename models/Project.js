@@ -16,6 +16,10 @@ const projectSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Image is required']
   },
+  cloudinaryId: {
+    type: String,
+    required: false // Not required since older projects won't have this
+  },
   technologies: [{
     type: String,
     required: [true, 'At least one technology is required'],
