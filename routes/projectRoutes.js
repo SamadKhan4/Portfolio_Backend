@@ -1,8 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { validateObjectId } = require('../middleware/validation');
-const { protect } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+
+const { validateObjectId } = require("../middleware/validation");
+const { protect } = require("../middleware/auth");
+const upload = require("../middleware/upload");
+
 const {
   getProjects,
   getFeaturedProjects,
@@ -10,17 +12,53 @@ const {
   createProject,
   updateProject,
   deleteProject
-} = require('../controllers/projectController');
+} = require("../controllers/projectController");
 
-router.route('/')
-  .get(getProjects)
-  .post(protect, upload.single('image'), createProject);
+/*
+================================
+Public Routes
+================================
+*/
 
-router.get('/featured', getFeaturedProjects);
+// Get all projects
+router.get("/", getProjects);
 
-router.route('/:id')
-  .get(validateObjectId, getProjectById)
-  .put(validateObjectId, protect, upload.single('image'), updateProject)
-  .delete(validateObjectId, protect, deleteProject);
+// Get featured projects
+router.get("/featured", getFeaturedProjects);
+
+// Get single project
+router.get("/:id", validateObjectId, getProjectById);
+
+
+/*
+================================
+Protected Admin Routes
+================================
+*/
+
+// Create project
+router.post(
+  "/",
+  protect,
+  upload.single("image"),
+  createProject
+);
+
+// Update project
+router.put(
+  "/:id",
+  protect,
+  validateObjectId,
+  upload.single("image"),
+  updateProject
+);
+
+// Delete project
+router.delete(
+  "/:id",
+  protect,
+  validateObjectId,
+  deleteProject
+);
 
 module.exports = router;
