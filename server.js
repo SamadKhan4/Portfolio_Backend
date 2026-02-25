@@ -20,6 +20,7 @@ app.use(cors({
   origin: '*', // Allow all origins
   credentials: true
 }));
+app.set("trust proxy", 1); // IMPORTANT for deployment
 app.use(express.json({ extended: false }));
 
 // Rate limiting
