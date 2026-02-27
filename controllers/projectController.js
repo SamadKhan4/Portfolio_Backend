@@ -62,21 +62,10 @@ exports.createProject = async (req, res) => {
     let imageData = {};
 
     if (req.file) {
-
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "portfolio_projects",
-        resource_type: "image",
-        transformation: [
-          { width: 1200, crop: "limit" },
-          { quality: "auto" },
-          { fetch_format: "auto" }
-        ]
-      });
-
-      imageData.image = result.secure_url;
-      imageData.cloudinaryId = result.public_id;
-
-      fs.unlinkSync(req.file.path); // delete local file
+      // When using Cloudinary storage, req.file.path contains the Cloudinary URL
+      // and req.file.filename contains the public_id
+      imageData.image = req.file.path;
+      imageData.cloudinaryId = req.file.filename;
     }
 
     const project = await Project.create({
@@ -120,20 +109,10 @@ exports.updateProject = async (req, res) => {
         await cloudinary.uploader.destroy(project.cloudinaryId);
       }
 
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "portfolio_projects",
-        resource_type: "image",
-        transformation: [
-          { width: 1200, crop: "limit" },
-          { quality: "auto" },
-          { fetch_format: "auto" }
-        ]
-      });
-
-      updateData.image = result.secure_url;
-      updateData.cloudinaryId = result.public_id;
-
-      fs.unlinkSync(req.file.path);
+      // When using Cloudinary storage, req.file.path contains the Cloudinary URL
+      // and req.file.filename contains the public_id
+      updateData.image = req.file.path;
+      updateData.cloudinaryId = req.file.filename;
     }
 
     project = await Project.findByIdAndUpdate(
