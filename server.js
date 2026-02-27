@@ -17,7 +17,14 @@ connectDB();
 
 // Init Middleware
 app.use(cors({
-  origin: '*', // Allow all origins
+  origin: [
+    'http://localhost:3000', // Local development
+    'http://localhost:3001', 
+    'http://localhost:5173', 
+    'http://localhost:5174', // Alternative local port
+    'https://samad-khan-portfolio-ctdybde19-samad-khans-projects-46cab6a2.vercel.app',
+    'https://portfolio-admin-panel-zeta.vercel.app/'
+  ],
   credentials: true
 }));
 app.set("trust proxy", 1); // IMPORTANT for deployment
