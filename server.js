@@ -23,7 +23,8 @@ app.use(cors({
     'http://localhost:5173', 
     'http://localhost:5174', // Alternative local port
     'https://samad-khan-portfolio-ctdybde19-samad-khans-projects-46cab6a2.vercel.app',
-    'https://portfolio-admin-panel-zeta.vercel.app/'
+    'https://portfolio-admin-panel-zeta.vercel.app/',
+    'https://portfoliobackend-production-4d3b.up.railway.app' // Railway deployment
   ],
   credentials: true
 }));
